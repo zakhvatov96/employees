@@ -15,7 +15,10 @@ class App extends Component {
 						{name: 'John C.', salary: 800, increase: false, like: true, id: 1},
 						{name: 'Alex M.', salary: 3000, increase: true, like: false, id: 2},
 						{name: 'Carl W.', salary: 5000, increase: false, like: false, id: 3},
-						] };
+						],
+					   term: '',
+					   btn: 0
+					};
 		this.maxId = 4
 	}
 
@@ -42,21 +45,51 @@ class App extends Component {
 		}))
 	}
 
+	searchEmp = (items, term) => {
+		if(term.length === 0) {
+			return items
+		} else {
+			return items.filter(item => {
+				return item.name.toLowerCase().indexOf(term.toLowerCase()) > -1;
+			})
+		}
+	}
+
+	filterEmp = (items, btn) => {
+		if(+btn === 1) {
+			return items.filter(item => item.like);
+		} else if (+btn === 2) {
+			return items.filter(item => item.salary > 1000);
+		} else {
+			return items
+		}
+	}
+
+	onSearchUpdate = (term) => {
+		this.setState({term});
+	}
+
+	onFilterUpdate = (btn) => {
+		this.setState({btn});
+	}
+
 	render() {
-		const {data} = this.state;
+		const {data, term, btn} = this.state;
 		const employees = data.length;
 		const increase = data.filter(item => item.increase).length;
+		const visibleData = this.filterEmp(this.searchEmp(data, term), btn);
 		return (
 			<div className="app">
 				<AppInfo employees={employees}
 						 increase={increase}/>
 
 				<div className="search-panel">
-					<SearchPanel />
-					<AppFilter />
+					<SearchPanel onSearchUpdate={this.onSearchUpdate}/>
+					<AppFilter onFilterUpdate={this.onFilterUpdate}
+							   filter={btn} />
 				</div>
 
-				<EmployersList data={data} 
+				<EmployersList data={visibleData} 
 							   onDelete={this.onDelete}
 							   onToggleProp={this.onToggleProp} />
 				<EmployersAddForm onAdd={this.onAdd} />
